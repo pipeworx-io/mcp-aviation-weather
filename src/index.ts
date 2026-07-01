@@ -151,10 +151,18 @@ async function callTool(name: string, args: Record<string, unknown>): Promise<un
       }
       return fetchAW('/pirep', params);
     }
-    case 'sigmet':
-      return fetchAW('/airsigmet', { hazard: 'sigmet', format: String(args.format ?? 'json') });
-    case 'airmet':
-      return fetchAW('/airsigmet', { hazard: 'airmet', format: String(args.format ?? 'json') });
+    // The API's `hazard` param no longer accepts sigmet/airmet ("Invalid value
+    // for hazard" 400 — it means conv/turb/ice now), and server-side `type`
+    // filtering is unreliable. Fetch all air/sigmets and filter client-side on
+    // the airSigmetType field.
+    case 'sigmet': {
+      const all = await fetchAW('/airsigmet', { format: 'json' });
+      return Array.isArray(all) ? all.filter((x: Record<string, unknown>) => String(x.airSigmetType).toUpperCase() === 'SIGMET') : all;
+    }
+    case 'airmet': {
+      const all = await fetchAW('/airsigmet', { format: 'json' });
+      return Array.isArray(all) ? all.filter((x: Record<string, unknown>) => String(x.airSigmetType).toUpperCase() === 'AIRMET') : all;
+    }
     case 'gairmet': {
       const params: Record<string, string> = { format: String(args.format ?? 'json') };
       if (args.type) params.type = String(args.type);
