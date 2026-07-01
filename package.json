@@ -1,6 +1,6 @@
 {
   "name": "@pipeworx/mcp-aviation-weather",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Aviation Weather MCP — METAR, TAF, PIREPs, AIRMET/SIGMET, station info",
   "type": "module",
   "main": "src/index.ts",

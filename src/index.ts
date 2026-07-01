@@ -45,7 +45,7 @@ const tools: McpToolExport['tools'] = [
   },
   {
     name: 'taf',
-    description: 'Terminal Aerodrome Forecasts.',
+    description: 'Terminal Aerodrome Forecast (TAF) for one or more ICAO airport codes (e.g. KSFO,EGLL); returns forecast periods covering wind, visibility, and cloud ceilings for the next 24–30 h.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -58,13 +58,14 @@ const tools: McpToolExport['tools'] = [
   },
   {
     name: 'pirep',
-    description: 'Pilot reports. Optional id (station), age (hours), distance (NM), level (flight level).',
+    description: 'Pilot reports (PIREPs). Call with no args for recent US-wide reports (default CONUS box), or pass a station `id` for reports within `distance_nm` of it, or a custom `bbox`.',
     inputSchema: {
       type: 'object',
       properties: {
-        id: { type: 'string', description: 'Center station for proximity filter' },
+        id: { type: 'string', description: 'Center station for a proximity filter (e.g. "KORD"); reports within distance_nm of it.' },
+        distance_nm: { type: 'number', description: 'Radius from `id` in nautical miles (default 200). Only used with `id`.' },
+        bbox: { type: 'string', description: 'Bounding box "minLat,minLon,maxLat,maxLon" (default CONUS "20,-130,55,-60" when no id).' },
         age: { type: 'number', description: 'Lookback hours, default 1.5' },
-        distance_nm: { type: 'number', description: 'Distance from id in nautical miles, default 200' },
         level: { type: 'number', description: 'Flight level filter (FL310 = 310)' },
         format: { type: 'string', description: 'json (default) | raw' },
       },
@@ -72,7 +73,7 @@ const tools: McpToolExport['tools'] = [
   },
   {
     name: 'sigmet',
-    description: 'Currently active SIGMETs.',
+    description: 'Fetch all currently active SIGMETs (significant en-route weather hazards: convection, turbulence, icing, volcanic ash) from the US Aviation Weather Center; no inputs required.',
     inputSchema: {
       type: 'object',
       properties: { format: { type: 'string', description: 'json (default) | raw' } },
@@ -80,7 +81,7 @@ const tools: McpToolExport['tools'] = [
   },
   {
     name: 'airmet',
-    description: 'Currently active AIRMETs.',
+    description: 'Fetch all currently active AIRMETs (moderate turbulence, icing, IFR/mountain-obscuration advisories for general aviation) from the US Aviation Weather Center; no inputs required.',
     inputSchema: {
       type: 'object',
       properties: { format: { type: 'string' } },
@@ -88,7 +89,7 @@ const tools: McpToolExport['tools'] = [
   },
   {
     name: 'gairmet',
-    description: 'Graphical AIRMETs.',
+    description: 'Fetch Graphical AIRMETs from the US Aviation Weather Center; optionally filter by type (turb, ice, sfc_winds, lifr, ifr); returns GeoJSON-style hazard polygons.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -99,7 +100,7 @@ const tools: McpToolExport['tools'] = [
   },
   {
     name: 'windsaloft',
-    description: 'Winds aloft forecast.',
+    description: 'Winds and temperatures aloft forecast from the US Aviation Weather Center; specify US region (us/bos/mia/chi/dfw/slc/sfo/alaska) and level (low/high); returns an ASCII table or JSON.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -134,11 +135,20 @@ async function callTool(name: string, args: Record<string, unknown>): Promise<un
         format: String(args.format ?? 'json'),
       });
     case 'pirep': {
+      // The API REQUIRES either a station id + radial distance OR a bounding
+      // box — a bare /pirep 400s ("Must specify bounding box or stations ID and
+      // radial distance"). So: with `id`, always send a distance (default 200);
+      // without `id`, default to a CONUS bbox so a bare pirep() returns US-wide
+      // reports instead of an error.
       const params: Record<string, string> = { format: String(args.format ?? 'json') };
-      if (args.id) params.id = String(args.id);
       if (args.age !== undefined) params.age = String(args.age);
-      if (args.distance_nm !== undefined) params.distance = String(args.distance_nm);
       if (args.level !== undefined) params.level = String(args.level);
+      if (args.id) {
+        params.id = String(args.id);
+        params.distance = String(args.distance_nm ?? 200);
+      } else {
+        params.bbox = typeof args.bbox === 'string' && args.bbox.trim() ? String(args.bbox) : '20,-130,55,-60';
+      }
       return fetchAW('/pirep', params);
     }
     case 'sigmet':
@@ -179,10 +189,16 @@ async function fetchAW(path: string, paramsObj: Record<string, string>) {
   }
   const format = paramsObj.format ?? 'json';
   if (format === 'json') {
+    // Read once as text, then attempt JSON parse on the string. The earlier
+    // version called res.json() then fell through to res.text() on parse
+    // failure — but res.json() consumes the body, so the fallback hit
+    // "Body has already been used". Reading text first avoids that and
+    // also lets us return the raw payload when the upstream returns plain
+    // text (e.g. /windtemp ignores ?format=json and ships an ASCII table).
+    const text = await res.text();
     try {
-      return await res.json();
+      return JSON.parse(text);
     } catch {
-      const text = await res.text();
       return { format: 'raw', body: text };
     }
   }
