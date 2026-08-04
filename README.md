@@ -1,21 +1,23 @@
-# mcp-aviation-weather
+# @pipeworx/aviation-weather
 
-Aviation Weather MCP — METAR, TAF, PIREPs, AIRMET/SIGMET, station info
+aviationweather.gov MCP — METAR, TAF, PIREPs, AIRMET/SIGMET, NOTAMs from the US NWS Aviation Weather Center. Global coverage for many products. No auth.
 
-Part of [Pipeworx](https://pipeworx.io) — an MCP gateway connecting AI agents to 1160+ live data sources.
+Part of [Pipeworx](https://pipeworx.io) — an MCP gateway connecting AI agents to 1394+ live data sources.
 
 ## Tools
 
-| Tool | Description |
-|------|-------------|
-| `metar` | METAR observations. ids = comma-sep ICAO codes (KSFO,EGLL,LFPG). |
-| `taf` | Terminal Aerodrome Forecast (TAF) for one or more ICAO airport codes (e.g. KSFO,EGLL); returns forecast periods covering wind, visibility, and cloud ceilings for the next 24–30 h. |
-| `pirep` | Pilot reports (PIREPs). Call with no args for recent US-wide reports (default CONUS box), or pass a station `id` for reports within `distance_nm` of it, or a custom `bbox`. |
-| `sigmet` | Fetch all currently active SIGMETs (significant en-route weather hazards: convection, turbulence, icing, volcanic ash) from the US Aviation Weather Center; no inputs required. |
-| `airmet` | Fetch all currently active AIRMETs (moderate turbulence, icing, IFR/mountain-obscuration advisories for general aviation) from the US Aviation Weather Center; no inputs required. |
-| `gairmet` | Fetch Graphical AIRMETs from the US Aviation Weather Center; optionally filter by type (turb, ice, sfc_winds, lifr, ifr); returns GeoJSON-style hazard polygons. |
-| `windsaloft` | Winds and temperatures aloft forecast from the US Aviation Weather Center; specify US region (us/bos/mia/chi/dfw/slc/sfo/alaska) and level (low/high); returns an ASCII table or JSON. |
-| `stationinfo` | Aerodrome metadata — lat/lon, elevation, country. |
+- `metar(ids, hours_before?, format?)` — current/recent METAR observations
+- `taf(ids, hours_before?, format?)` — terminal aerodrome forecasts
+- `pirep(id?, age?, distance_nm?, level?)` — pilot reports
+- `sigmet(format?)` — SIGMETs (significant met advisories)
+- `airmet(format?)` — AIRMETs
+- `windsaloft(region?, level?)` — winds aloft forecast
+- `gairmet(format?, type?)` — graphical AIRMETs
+- `stationinfo(ids)` — aerodrome lat/lon, elevation, country
+
+## Data source
+
+`https://aviationweather.gov/api/data/` — `format=json` for structured output.
 
 ## Quick Start
 
@@ -31,7 +33,7 @@ Add to your MCP client (Claude Desktop, Cursor, Windsurf, etc.):
 }
 ```
 
-Or connect to the full Pipeworx gateway for access to all 1160+ data sources:
+Or connect to the full Pipeworx gateway for access to all 1394+ data sources:
 
 ```json
 {
@@ -55,7 +57,7 @@ The gateway picks the right tool and fills the arguments automatically.
 
 ## More
 
-- [All tools and guides](https://github.com/pipeworx-io/examples)
+- [Docs and guides](https://pipeworx.io/docs)
 - [pipeworx.io](https://pipeworx.io)
 
 ## License
