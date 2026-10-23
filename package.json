@@ -1,6 +1,6 @@
 {
   "name": "@pipeworx/mcp-aviation-weather",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Aviation Weather MCP — METAR, TAF, PIREPs, AIRMET/SIGMET, station info",
   "type": "module",
   "main": "src/index.ts",
@@ -26,7 +26,7 @@
     "@cloudflare/workers-types": "^4.20260405.1"
   },
   "pipeworx": {
-    "sourceHash": "v1-6cdd456d5e669fedb1d2c9bbc678f531709a3c1889b7a60dec9d910f247477ea",
-    "sourceCommit": "54bf7d1c06a0775508a65d0c388dd10ba75174c3"
+    "sourceHash": "v1-a071ea15a72ed3829ffd30a80f7b32d98fd3491267a53da135f5866a0db50d8c",
+    "sourceCommit": "93c7d52ace03a2bb9aee5e6024f6858adab0dd04"
   }
 }
