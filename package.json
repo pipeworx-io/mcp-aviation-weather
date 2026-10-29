@@ -1,12 +1,20 @@
 {
   "name": "@pipeworx/mcp-aviation-weather",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "Aviation Weather MCP — METAR, TAF, PIREPs, AIRMET/SIGMET, station info",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./tools.json": "./tools.json",
+    "./package.json": "./package.json"
+  },
   "bin": {
     "mcp-aviation-weather": "bin/cli.js"
+  },
+  "files": ["bin/", "lib/", "tools.json", "server.json"],
+  "engines": {
+    "node": ">=18"
   },
   "keywords": ["mcp", "mcp-server", "model-context-protocol", "pipeworx", "aviation-weather"],
   "license": "MIT",
@@ -14,19 +22,12 @@
     "type": "git",
     "url": "git+https://github.com/pipeworx-io/mcp-aviation-weather.git"
   },
-  "scripts": {
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.30.0",
-    "tsx": "^4.19.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.9.3",
-    "@cloudflare/workers-types": "^4.20260405.1"
-  },
+  "mcpName": "io.github.pipeworx-io/aviation-weather",
   "pipeworx": {
-    "sourceHash": "v1-a071ea15a72ed3829ffd30a80f7b32d98fd3491267a53da135f5866a0db50d8c",
-    "sourceCommit": "93c7d52ace03a2bb9aee5e6024f6858adab0dd04"
+    "mode": "gateway",
+    "slug": "aviation-weather",
+    "gatewaySlug": "aviation-weather",
+    "sourceHash": "v1-ea6c24cb98cf576cac64b0b7b0d38fa88003d8e81c0d05b77c3b4281b91c11bd",
+    "sourceCommit": "c6136b81713e72ccb22977ca0c0cd981f8c3f081"
   }
 }
